@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Contador del dinero ganado por día, mes y persona.">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Contador">
+  <title>Contador de dinero</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="cabecera">
+    <h1>Contador</h1>
+    <p>Hoy <strong id="cabecera-hoy">0,00 €</strong></p>
+  </header>
+
+  <div id="aviso-actualizacion" class="aviso" role="status" hidden>
+    <span>Nueva versión disponible <span id="aviso-version"></span></span>
+    <button type="button" id="btn-aplicar-actualizacion">Actualizar</button>
+  </div>
+
+  <main>
+    <!-- Vista HOY: contador del día y formulario para añadir cobros -->
+    <section id="vista-hoy" class="vista">
+      <div class="totales">
+        <div class="cifra destacada">
+          <span>Hoy</span>
+          <strong id="total-hoy">0,00 €</strong>
+          <small id="num-hoy">0 cobros</small>
+        </div>
+        <div class="cifra">
+          <span>Este mes</span>
+          <strong id="total-mes-actual">0,00 €</strong>
+          <small id="num-mes-actual">0 cobros</small>
+        </div>
+      </div>
+
+      <form id="form-cobro" class="panel" autocomplete="off" novalidate>
+        <h2 id="titulo-form">Nuevo cobro</h2>
+
+        <label for="nombre">Persona</label>
+        <input id="nombre" name="nombre" list="lista-nombres" maxlength="60"
+               placeholder="Nombre de la persona" autocapitalize="words" enterkeyhint="next" required>
+        <datalist id="lista-nombres"></datalist>
+        <div id="chips-nombres" class="chips" aria-label="Personas frecuentes"></div>
+
+        <label for="importe">Dinero ganado (€)</label>
+        <input id="importe" name="importe" inputmode="decimal" placeholder="0,00" enterkeyhint="done" required>
+        <div id="chips-importes" class="chips" aria-label="Importes rápidos"></div>
+
+        <details id="mas-opciones" class="mas-opciones">
+          <summary>Fecha y nota</summary>
+          <label for="fecha">Fecha</label>
+          <input type="date" id="fecha" name="fecha" required>
+          <label for="nota">Nota</label>
+          <input id="nota" name="nota" maxlength="120" placeholder="Opcional">
+        </details>
+
+        <p id="error-form" class="error" role="alert" hidden></p>
+
+        <div class="acciones">
+          <button type="submit" id="btn-guardar" class="btn-principal">Añadir</button>
+          <button type="button" id="btn-cancelar" class="btn-secundario" hidden>Cancelar</button>
+        </div>
+      </form>
+
+      <section class="panel">
+        <h2>Cobros de hoy</h2>
+        <ul id="lista-hoy" class="lista"></ul>
+        <p id="vacio-hoy" class="vacio">Todavía no hay cobros hoy.</p>
+      </section>
+    </section>
+
+    <!-- Vista MES: resumen mensual por persona y por día -->
+    <section id="vista-mes" class="vista" hidden>
+      <div class="navegador-mes">
+        <button type="button" id="mes-anterior" class="btn-icono" aria-label="Mes anterior">&#8249;</button>
+        <h2 id="titulo-mes"></h2>
+        <button type="button" id="mes-siguiente" class="btn-icono" aria-label="Mes siguiente">&#8250;</button>
+      </div>
+
+      <div class="totales">
+        <div class="cifra destacada ancha">
+          <span>Total del mes</span>
+          <strong id="total-mes">0,00 €</strong>
+          <small id="num-mes">0 cobros</small>
+        </div>
+        <div class="cifra">
+          <span>Días trabajados</span>
+          <strong id="dias-mes">0</strong>
+        </div>
+        <div class="cifra">
+          <span>Media por día</span>
+          <strong id="media-mes">0,00 €</strong>
+        </div>
+      </div>
+
+      <section class="panel">
+        <h2>Por persona</h2>
+        <table class="tabla" id="tabla-personas">
+          <thead>
+            <tr><th scope="col">Persona</th><th scope="col">Nº</th><th scope="col">Total</th></tr>
+          </thead>
+          <tbody id="por-persona"></tbody>
+        </table>
+        <p id="vacio-mes" class="vacio">No hay cobros este mes.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Por día</h2>
+        <div id="por-dia"></div>
+      </section>
+
+      <button type="button" id="btn-csv" class="btn-secundario ancho">Exportar mes a Excel (CSV)</button>
+    </section>
+
+    <!-- Vista AJUSTES: importes rápidos, copia de seguridad y actualizaciones -->
+    <section id="vista-ajustes" class="vista" hidden>
+      <form id="form-importes" class="panel">
+        <h2>Importes rápidos</h2>
+        <label for="importes-rapidos">Botones de importe (separados por espacios)</label>
+        <input id="importes-rapidos" inputmode="decimal" placeholder="0,50 1 1,50 2">
+        <div class="acciones">
+          <button type="submit" class="btn-principal">Guardar</button>
+        </div>
+      </form>
+
+      <section class="panel">
+        <h2>Copia de seguridad</h2>
+        <p class="ayuda">Los datos se guardan solo en este móvil. Haz una copia de vez en cuando.</p>
+        <div class="acciones">
+          <button type="button" id="btn-exportar" class="btn-secundario">Guardar copia</button>
+          <label class="btn-secundario" for="archivo-importar">Restaurar copia</label>
+          <input type="file" id="archivo-importar" accept="application/json,.json" hidden>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Actualizaciones</h2>
+        <p>Versión instalada: <strong id="version-instalada">—</strong></p>
+        <p id="estado-actualizacion" class="ayuda" role="status"></p>
+        <div class="acciones">
+          <button type="button" id="btn-buscar-actualizacion" class="btn-principal">Buscar actualizaciones</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <nav class="pestanas" aria-label="Secciones">
+    <button type="button" data-vista="hoy" aria-current="page">Hoy</button>
+    <button type="button" data-vista="mes">Mes</button>
+    <button type="button" data-vista="ajustes">Ajustes</button>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,43 @@
+name: Publicar en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  desplegar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Cada commit genera una versión distinta del service worker,
+      # así la app del móvil detecta la actualización.
+      - name: Marcar la versión con el commit
+        run: sed -i "s/__BUILD__/${GITHUB_SHA::7}/" sw.js
+
+      - name: Preparar la web
+        run: |
+          mkdir _site
+          cp -r index.html styles.css app.js sw.js manifest.webmanifest icons _site/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: despliegue
+        uses: actions/deploy-pages@v4
