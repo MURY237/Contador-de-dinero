@@ -387,6 +387,12 @@ function pintarAjustes() {
 // ---------- Exportar / importar ----------
 
 function descargar(nombreArchivo, contenido, tipo) {
+  // Dentro del APK de Android el WebView no descarga blobs: se guarda con el puente nativo
+  if (window.AndroidApp) {
+    const guardado = window.AndroidApp.guardarArchivo(nombreArchivo, contenido, tipo);
+    avisar(guardado ? `Guardado en Descargas: ${nombreArchivo}` : 'No se pudo guardar el archivo');
+    return;
+  }
   const url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
   const a = crear('a', { href: url, download: nombreArchivo });
   document.body.append(a);
@@ -530,4 +536,6 @@ if (navigator.storage && navigator.storage.persist) navigator.storage.persist().
 limpiarFormulario();
 pintarAjustes();
 pintar();
+// El enlace para descargar el APK solo tiene sentido fuera del APK
+$('panel-android').hidden = Boolean(window.AndroidApp);
 iniciarActualizaciones();

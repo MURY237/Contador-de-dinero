@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'io.github.mury237.contador'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'io.github.mury237.contador'
+        minSdk 29
+        // 34 evita el modo edge-to-edge obligatorio de Android 15 en el WebView
+        targetSdk 34
+        // En GitHub Actions cada compilación tiene un número mayor, así el APK nuevo se instala encima
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
+        versionName '1.0'
+    }
+
+    // Clave de firma fija: permite instalar APK nuevos encima sin desinstalar (y sin perder datos).
+    // Es pública porque está en el repositorio; la app no se distribuye en Google Play.
+    signingConfigs {
+        release {
+            storeFile file('contador.keystore')
+            storePassword 'contador-dinero'
+            keyAlias 'contador'
+            keyPassword 'contador-dinero'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        // App instalada a mano (no Google Play): no bloquear la compilación por avisos de Play
+        checkReleaseBuilds false
+    }
+}

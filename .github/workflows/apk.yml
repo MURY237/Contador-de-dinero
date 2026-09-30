@@ -1,0 +1,55 @@
+name: Compilar APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - '.github/workflows/apk.yml'
+  pull_request:
+    paths:
+      - 'android/**'
+      - '.github/workflows/apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      - name: Compilar APK firmado
+        working-directory: android
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Renombrar APK
+        run: cp android/app/build/outputs/apk/release/app-release.apk ContadorDeDinero.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ContadorDeDinero
+          path: ContadorDeDinero.apk
+
+      # Enlace fijo: https://github.com/<repo>/releases/download/apk/ContadorDeDinero.apk
+      - name: Publicar en Releases
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete apk --yes --cleanup-tag || true
+          gh release create apk ContadorDeDinero.apk \
+            --target "$GITHUB_SHA" \
+            --title "App Android" \
+            --notes "APK de la app. Descárgalo desde el móvil e instálalo (permite instalar apps desconocidas si Android lo pide)."
