@@ -3,6 +3,11 @@ name: Publicar en GitHub Pages
 on:
   push:
     branches: [main]
+    # Cambios solo del APK o de la documentación no publican una versión web nueva
+    paths-ignore:
+      - 'android/**'
+      - '.github/workflows/apk.yml'
+      - 'README.md'
   workflow_dispatch:
 
 permissions:
