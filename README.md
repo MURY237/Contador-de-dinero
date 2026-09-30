@@ -26,6 +26,8 @@ Los datos se guardan **solo en el móvil** (`localStorage` del navegador). Nunca
 | `sw.js` | Service worker: modo sin conexión y control de versiones |
 | `manifest.webmanifest` | Nombre, icono y modo app al instalar |
 | `.github/workflows/pages.yml` | Publica la app en GitHub Pages en cada push a `main` |
+| `android/` | App Android (WebView) que se compila como APK |
+| `.github/workflows/apk.yml` | Compila el APK y lo publica en Releases |
 
 ## Publicar la app (una sola vez)
 
@@ -40,6 +42,19 @@ GitHub Pages gratis necesita que el repositorio sea público. El repositorio sol
 
 1. **Android (Chrome):** abre la URL, menú **⋮ → Instalar aplicación** (o *Añadir a pantalla de inicio*).
 2. **iPhone (Safari):** abre la URL, botón **Compartir → Añadir a pantalla de inicio**.
+
+## App para Android (APK)
+
+La carpeta `android/` contiene una app nativa mínima: un WebView que abre la app publicada en GitHub Pages.
+
+- El workflow *Compilar APK* la compila en cada cambio de `android/` en `main` y la publica en Releases:
+  `https://github.com/MURY237/Contador-de-dinero/releases/download/apk/ContadorDeDinero.apk`
+- La web también tiene el enlace en **Ajustes → App para Android**.
+- Instalar: descarga el APK en el móvil, ábrelo y permite *Instalar apps desconocidas* si Android lo pide.
+- Las copias de seguridad y los CSV se guardan en la carpeta **Descargas**.
+- La app se actualiza igual que la web (**Ajustes → Buscar actualizaciones**). Solo hace falta reinstalar el APK si cambia el código de `android/`.
+- El APK se firma con `android/app/contador.keystore`. La clave es pública (está en el repositorio): sirve para que un APK nuevo se instale encima sin perder datos. No uses esta clave para apps de Google Play.
+- La primera vez que abras la app necesitas Internet. Después funciona sin conexión.
 
 ## Publicar una actualización
 

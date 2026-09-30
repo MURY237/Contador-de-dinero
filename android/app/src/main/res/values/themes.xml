@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- DayNight: el WebView sigue el modo claro/oscuro del sistema -->
+    <style name="Tema" parent="android:Theme.DeviceDefault.DayNight">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@color/primario</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/primario</item>
+    </style>
+</resources>
